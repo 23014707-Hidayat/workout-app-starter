@@ -1,28 +1,36 @@
-const express = require('express')
-const {
-  createWorkout,
-  getWorkouts,
-  getWorkout,
-  deleteWorkout,
-  updateWorkout
-} = require('../controllers/workoutController')
+const express = require('express');
+const authMiddleware = require('../middleware/authMiddleware');
+const Workout = require('../models/Workout');
 
-const router = express.Router()
+const router = express.Router();
 
-// GET all workouts
-router.get('/', getWorkouts)
+// Get all workouts for logged-in user
+router.get('/', authMiddleware, async (req, res) => {
+  const workouts = await Workout.find({ user: req.user });
+  res.json(workouts);
+});
 
-//GET a single workout
-router.get('/:id', getWorkout)
+// Add a workout
+router.post('/', authMiddleware, async (req, res) => {
+  const workout = new Workout({ ...req.body, user: req.user });
+  await workout.save();
+  res.json(workout);
+});
 
-// POST a new workout
-router.post('/', createWorkout)
+// Update a workout
+router.put('/:id', authMiddleware, async (req, res) => {
+  const workout = await Workout.findOneAndUpdate(
+    { _id: req.params.id, user: req.user },
+    req.body,
+    { new: true }
+  );
+  res.json(workout);
+});
 
-// DELETE a workout
-router.delete('/:id', deleteWorkout)
+// Delete a workout
+router.delete('/:id', authMiddleware, async (req, res) => {
+  await Workout.findOneAndDelete({ _id: req.params.id, user: req.user });
+  res.json({ msg: 'Workout deleted' });
+});
 
-// UPDATE a workout
-router.patch('/:id', updateWorkout)
-
-
-module.exports = router
+module.exports = router;
