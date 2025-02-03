@@ -6,6 +6,8 @@ const authRoutes = require('./routes/auth');
 const cors = require('cors');
 
 const app = express();
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -13,11 +15,15 @@ app.use(express.json());
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/auth', authRoutes);
 
-// Connect to DB
+// Connect to DB and start the server
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-    app.listen(process.env.PORT || 4000, () => {
-      console.log(`Server running on port ${process.env.PORT || 4000}`);
+    const port = process.env.PORT || 4000;
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
     });
   })
-  .catch(error => console.log(error));
+  .catch((error) => {
+    console.error("Database connection failed:", error);
+    process.exit(1);  // Stop the app if DB connection fails
+  });
