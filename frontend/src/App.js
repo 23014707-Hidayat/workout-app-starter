@@ -1,25 +1,24 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+// App.js
+import React, { useContext } from 'react';
+import { AuthContext } from './context/AuthContext';
+import LoginPage from './components/LoginPage';
+import WorkoutPage from './components/WorkoutPage';
 
-// pages & components
-import Home from './pages/Home'
-import Navbar from './components/Navbar'
+const App = () => {
+  const { isAuthenticated, login, logout } = useContext(AuthContext);
 
-function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Navbar />
-        <div className="pages">
-          <Routes>
-            <Route 
-              path="/"
-              element={<Home />}
-            />
-          </Routes>
-        </div>
-      </BrowserRouter>
+    <div>
+      {isAuthenticated ? (
+        <>
+          <WorkoutPage />
+          <button onClick={logout}>Logout</button>
+        </>
+      ) : (
+        <LoginPage onLogin={login} />
+      )}
     </div>
   );
-}
+};
 
 export default App;
